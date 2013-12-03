@@ -1,0 +1,44 @@
+CROSS_HOST="x86_64-w64-mingw32"
+ORIG_PN="ORBit2"
+inherit cross gnome2
+
+NAME="mingw64-x86_64-ORBit2"
+VERSION=2.14.19
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="CORBA 2.4 Object Request Broker library for Win64 toolchain"
+DESCRIPTION="This package does NOT contain cygwin binaries.  Instead, it
+contains msvcrt-linked binaries (aka 'mingw').  It is for use with the
+mingw64-x86_64-gcc cross compiler, and installs into the
+/usr/x86_64-w64-mingw32/sys-root/mingw/{lib,include} directories."
+HOMEPAGE="http://www.gnome.org/projects/ORBit2/"
+
+PATCH_URI="2.14.19-glib-deprecated.patch"
+
+DIFF_EXCLUDES="orbit-config.h"
+
+REQUIRES="libORBit2-devel"  # for orbit-idl-2
+
+CYGCONF_ARGS="
+	--disable-maintainer-mode
+	--with-idl-compiler=/usr/bin/orbit-idl-2.exe
+	ac_cv_alignof_CORBA_octet=1
+	ac_cv_alignof_CORBA_boolean=1
+	ac_cv_alignof_CORBA_char=1
+	ac_cv_alignof_CORBA_wchar=2
+	ac_cv_alignof_CORBA_short=2
+	ac_cv_alignof_CORBA_long=4
+	ac_cv_alignof_CORBA_long_long=8
+	ac_cv_alignof_CORBA_float=4
+	ac_cv_alignof_CORBA_double=8
+	ac_cv_alignof_CORBA_long_double=16
+	ac_cv_alignof_CORBA_struct=1
+	ac_cv_alignof_CORBA_pointer=8
+"
+MAKEOPTS+=" -j1 bin_PROGRAMS= idl_DATA= "
+
+src_install() {
+	cd ${B}
+	cyginstall
+	sed -i -e "/^orbit_idl=/s|${CROSS_PREFIX}|/usr|" ${D}${CROSS_LIBDIR}/pkgconfig/ORBit-2.0.pc
+}
